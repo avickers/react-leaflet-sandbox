@@ -1,6 +1,6 @@
 {
   "name": "react-leaflet-sandbox",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Sandbox for React-Leaflet and Census data",
   "main": "src/index.js",
   "scripts": {
@@ -11,9 +11,11 @@
   "license": "MIT",
   "dependencies": {
     "leaflet": "^1.6.0",
-    "react-leaflet": "^2.6.0",
+    "lokijs": "^1.5.8",
+    "papaparse": "^5.1.0",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react-dom": "^16.8.6",
+    "react-leaflet": "^2.6.0"
   },
   "browserslist": [
     "last 1 version",
