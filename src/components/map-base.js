@@ -1,10 +1,10 @@
 import Leaflet from 'leaflet'
-import React, { Component } from 'react'
+import React, { Component, Suspense } from 'react'
 import { Map, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet'
+import ReactLoading from "react-loading"
 import Papa from 'papaparse'
 import Loki from 'lokijs'
 import LokiIndexedAdapter from 'lokijs/src/loki-indexed-adapter'
-//import supers from '../assets/super.json'
 import tracts from '../assets/tctracts.json'
 import csv from '../assets/tc_lrs.csv'
 
@@ -13,6 +13,7 @@ export default class MapBase extends Component {
     super()
     this.db = null
     this.state = {
+      isLoading: false,
       lat: 30.2672,
       lng: -97.7431,
       zoom: 11,
@@ -20,6 +21,9 @@ export default class MapBase extends Component {
   }
 
   componentDidMount() {
+    this.setState({
+      isLoading: true
+    })
     const idbAdapter = new LokiIndexedAdapter()
     this.db = new Loki('metadata.db', {
       adapter: idbAdapter,
@@ -43,24 +47,34 @@ export default class MapBase extends Component {
       console.log(meta)
     } else {
       console.log(meta)
-    }
-  }
-
-  geoJSONStyle() {
-    return {
-      color: '#1f2021',
-      weight: 1,
-      fillOpacity: Math.random(),
-      fillColor: 'silver',
+      console.log(tracts)
+      this.setState({
+        loadData: true,
+        isLoading: false,
+        coll: meta
+      })
     }
   }
 
   onEachFeature(feature, layer) {
+    //console.log(layer)
     const popupContent = `<Popup> TBD </Popup>`
     layer.bindPopup(popupContent)
   }
 
+  geoStyle(feature) {
+    const coll = this.state.coll
+    let results = coll.find({'NAMELSAD': feature.properties.NAMELSAD})
+    return {
+      color: '#1f2021',
+      weight: 1,
+      fillOpacity: results[0]['Low_Response_Score']*0.02,
+      fillColor: 'silver'
+    }
+  }
+
   render() {
+    const { isLoading, loadData } = this.state
     const position = [this.state.lat, this.state.lng]
     return (
       <Map center={position} zoom={this.state.zoom}>
@@ -72,11 +86,15 @@ export default class MapBase extends Component {
           url='https://stamen-tiles-{s}.a.ssl.fastly.net/toner-hybrid/{z}/{x}/{y}{r}.png'
           attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>'
         />
-        <GeoJSON
-          data={tracts.features}
-          style={this.geoJSONStyle}
-          onEachFeature={this.onEachFeature}
-        />
+        {loadData && (
+          <Suspense fallback={<ReactLoading type="spinningBubble" color="green" />}>
+            <GeoJSON
+              data={tracts.features}
+              style={this.geoStyle.bind(this)}
+              onEachFeature={this.onEachFeature}
+            />
+          </Suspense>
+       )}
       </Map>
     )
   }

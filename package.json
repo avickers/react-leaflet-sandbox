@@ -15,7 +15,8 @@
     "papaparse": "^5.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-leaflet": "^2.6.0"
+    "react-leaflet": "^2.6.0",
+    "react-loading": "^2.0.3"
   },
   "browserslist": [
     "last 1 version",
