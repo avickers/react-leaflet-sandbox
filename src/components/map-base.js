@@ -1,7 +1,8 @@
-import Leaflet from 'leaflet'
+import L from 'leaflet'
 import React, { Component, Suspense } from 'react'
-import { Map, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet'
+import { Map, MapControl, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet'
 import ReactLoading from "react-loading"
+import Legend from './legend'
 import Papa from 'papaparse'
 import Loki from 'lokijs'
 import LokiIndexedAdapter from 'lokijs/src/loki-indexed-adapter'
@@ -24,9 +25,9 @@ export default class MapBase extends Component {
     this.setState({
       isLoading: true
     })
-    const idbAdapter = new LokiIndexedAdapter()
+    //const idbAdapter = new LokiIndexedAdapter()
     this.db = new Loki('metadata.db', {
-      adapter: idbAdapter,
+      //adapter: idbAdapter,
       autoload: true,
       autoloadCallback : this.dbInit.bind(this)
     })
@@ -42,12 +43,14 @@ export default class MapBase extends Component {
         complete: data => {
           meta.insert(data.data)
           this.db.saveDatabase()
+          this.setState({
+            loadData: true,
+            isLoading: false,
+            coll: meta
+          })
         }
       })
-      console.log(meta)
     } else {
-      console.log(meta)
-      console.log(tracts)
       this.setState({
         loadData: true,
         isLoading: false,
@@ -57,8 +60,9 @@ export default class MapBase extends Component {
   }
 
   onEachFeature(feature, layer) {
-    //console.log(layer)
-    const popupContent = `<Popup> TBD </Popup>`
+    const coll = this.state.coll
+    let results = coll.find({'NAMELSAD': feature.properties.NAMELSAD})
+    const popupContent = `<Popup> Low Response Projection: ${results[0]['Low_Response_Score']||'N/A'} </Popup>`
     layer.bindPopup(popupContent)
   }
 
@@ -80,10 +84,10 @@ export default class MapBase extends Component {
       <Map center={position} zoom={this.state.zoom}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url='https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+          url='https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
         />
         <TileLayer
-          url='https://stamen-tiles-{s}.a.ssl.fastly.net/toner-hybrid/{z}/{x}/{y}{r}.png'
+          url='https://stamen-tiles-{s}.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}{r}.png'
           attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>'
         />
         {loadData && (
@@ -91,10 +95,11 @@ export default class MapBase extends Component {
             <GeoJSON
               data={tracts.features}
               style={this.geoStyle.bind(this)}
-              onEachFeature={this.onEachFeature}
+              onEachFeature={this.onEachFeature.bind(this)}
             />
           </Suspense>
        )}
+       <Legend />
       </Map>
     )
   }

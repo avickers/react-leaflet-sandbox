@@ -4,6 +4,7 @@
   "description": "Sandbox for React-Leaflet and Census data",
   "main": "src/index.js",
   "scripts": {
+    "build": "parcel build src/index.html",
     "start": "parcel src/index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,5 +24,8 @@
     "> 2%",
     "maintained node versions",
     "not dead"
-  ]
+  ],
+  "devDependencies": {
+    "cssnano": "^4.1.10"
+  }
 }
