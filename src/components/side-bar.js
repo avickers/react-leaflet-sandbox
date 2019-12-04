@@ -26,7 +26,8 @@ export default class Sidebar extends Koc {
             asian: Number.parseFloat(props['ACSPercents.pct_AsianAloneOrCombo']*100).toPrecision(3),
             black: Number.parseFloat(props['ACSPercents.pct_BlackAloneOrCombo']*100).toPrecision(3),
             hispanic: Number.parseFloat(props['ACSPercents.pct_Hispanic']*100).toPrecision(3),
-            poverty: Number.parseFloat(props['ACSPercents.pct_Poverty_Less100']*100).toPrecision(3)
+            poverty: Number.parseFloat(props['ACSPercents.pct_Poverty_Less100']*100).toPrecision(3),
+            mrr: Number.parseFloat(100-props['ACSPercents.MRR2010']).toPrecision(3)
           }
           //this.shadowRoot.querySelector('.card').classList.add('active')
           this.render(new Tract(cfg))

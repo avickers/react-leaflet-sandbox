@@ -69,9 +69,9 @@ export default class BaseMap extends Koc {
   }
 
   getTier(htc) {
-    return htc > .65 ? 3
-          : htc > .52  ? 2
-          : htc > .44  ? 1
+    return htc > 39.39 ? 3
+          : htc > 31.57  ? 2
+          : htc > 27.63  ? 1
           : 0;
   }
 
@@ -94,8 +94,8 @@ export default class BaseMap extends Koc {
   }
 
   onEachFeature(feature, layer) {
-    const color = this.getColor(feature.properties['ACSPercents.pct_Hispanic']*1.0)
-    const tier = this.getTier(feature.properties['ACSPercents.pct_Hispanic']*1.0)
+    const color = this.getColor(100 - feature.properties['ACSPercents.MRR2010'])
+    const tier = this.getTier(100 - feature.properties['ACSPercents.MRR2010'])
     const hoverStyle = {
       fillColor: color === 'transparent'
       ? '#43b3ae'
@@ -129,7 +129,7 @@ export default class BaseMap extends Koc {
   }
 
   style(feature) {
-    const color = this.getColor(feature.properties['ACSPercents.pct_Hispanic']*1.0)
+    const color = this.getColor(100 - feature.properties['ACSPercents.MRR2010'])
     return {
         fillColor: color,
         weight: 1,

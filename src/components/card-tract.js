@@ -16,7 +16,7 @@ const verdiShadowSmall = '0px 1px 0px #3b938f, 0px 2px 0px #327470, 0px 3px 0px 
 export default class Tract extends Koc {
   constructor(obj) {
     super()
-    const {id,tier,asian,black,hispanic,poverty,under5} = obj
+    const {id,tier,mrr,asian,black,hispanic,poverty,under5} = obj
     this.key = id
 
     const ko = this.ko()
@@ -24,6 +24,7 @@ export default class Tract extends Koc {
     this.vm = {
       id: ko.observable(id),
       tier: ko.observable(tier),
+      mrr: ko.observable(mrr),
       asian: ko.observable(asian||0),
       black: ko.observable(black||0),
       hispanic: ko.observable(hispanic||0),
@@ -51,6 +52,11 @@ export default class Tract extends Koc {
         decile_7: 18.34,
         decile_8: 22.85,
         decile_9: 34.94
+      },
+      mrr: {
+        decile_7: 27.63,
+        decile_8: 31.57,
+        decile_9: 39.39
       }
     }
 
@@ -74,6 +80,10 @@ export default class Tract extends Koc {
           <div class="poverty">
             <div class="subheader">Poverty</div>
             <span class="textShadow">${this.vm.poverty}%</span>
+          </div>
+          <div class="mrr">
+            <div class="subheader">Unresponsive (2010)</div>
+            <span class="textShadow">${this.vm.mrr}%</span>
           </div>
         </div>
       </div>
@@ -159,7 +169,7 @@ export default class Tract extends Koc {
       grid-template-areas:
             "asian black"
             "hispanic poverty"
-            "under5 under5";
+            "mrr mrr";
       grid-template-rows: 1fr 1fr;
       grid-gap: 10px 20px;
     }
@@ -240,6 +250,26 @@ export default class Tract extends Koc {
       : poverty < this.deciles.poverty.decile_8
       ? copperShadowSmall
       : poverty < this.deciles.poverty.decile_9
+      ? silverShadowSmall
+      : goldShadowSmall};
+    }
+    .mrr {
+      grid-area: mrr
+    }
+    .mrr .textShadow {
+      font-size: 26px;
+      color: ${ tier === 0
+      ? verdigris
+      : tier === 1
+      ? meltedCopper
+      : tier === 2
+      ? metallicSilver
+      : metallicGold};
+      text-shadow: ${ tier === 0
+      ? 'none'
+      : tier === 1
+      ? copperShadowSmall
+      : tier === 2
       ? silverShadowSmall
       : goldShadowSmall};
     }
