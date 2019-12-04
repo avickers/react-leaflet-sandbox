@@ -1,14 +1,11 @@
-import React, { StrictMode } from 'react'
+import {Koc} from '@avickers/knockdown'
 import MapBase from './map-base'
 
-function App() {
-  return(
-    <div>
-      <StrictMode>
-        <MapBase />
-      </StrictMode>
-    </div>
-  )
+export default class App extends Koc {
+  constructor() {
+    super()
+    const ko = this.ko()
+    this.html`<map-base></map-base>`
+  }
 }
-
-export default App
+customElements.define("ko-app", App)

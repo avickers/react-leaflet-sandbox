@@ -3,45 +3,23 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>React-Leaflet Templates</title>
+    <title>Census Sensai</title>
     <meta name="viewport" content="width=device-width">
-    <meta name="description" content="React-Leaflet Sandbox.">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    <meta name="description" content="Census Map for Austin, Travis County, Texas">
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-   crossorigin=""/>
+   crossorigin=""/> -->
+   <link href="https://fonts.googleapis.com/css?family=Montserrat+Alternates:500&display=swap" rel="stylesheet"> 
    <style>
     body {
       background-color: #000;
+      margin: 0;
+      font-family: Verdana;
     }
-     .leaflet-container {
-        height: 480px;
-        width: 80%;
-        margin: 0 auto;
-      }
-      .info {
-        padding: 6px 8px;
-        font: 14px/16px Arial, Helvetica, sans-serif;
-        background: black;
-        background: rgba(0, 0, 0, 0.8);
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-        border-radius: 5px;
-      }
-      .legend {
-        text-align: left;
-        line-height: 18px;
-        color: #c0c0c0;
-      }
-      .legend i {
-        width: 18px;
-        height: 18px;
-        float: left;
-        margin-right: 8px;
-        opacity: 0.7;
-      }
     </style>
   </head>
   <body>
-    <div id="app" style="min-height: 50vh"></div>
+    <ko-app style="min-height: 50vh"></ko-app>
     <script src="./index.js"></script>
   </body>
 </html>

@@ -1,113 +1,145 @@
+import {Buffer,Koc} from '@avickers/knockdown'
 import L from 'leaflet'
-import React, { Component, Suspense } from 'react'
-import { Map, MapControl, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet'
-import ReactLoading from "react-loading"
-import Legend from './legend'
-import Papa from 'papaparse'
 import Loki from 'lokijs'
 import LokiIndexedAdapter from 'lokijs/src/loki-indexed-adapter'
-import tracts from '../assets/tctracts.json'
-import csv from '../assets/tc_lrs.csv'
+import css from './css-leaflet'
 
-export default class MapBase extends Component {
+import tracts from '../assets/tracts.json'
+
+export default class BaseMap extends Koc {
   constructor() {
     super()
-    this.db = null
-    this.state = {
-      isLoading: false,
-      lat: 30.2672,
-      lng: -97.7431,
-      zoom: 11,
-    }
-  }
-
-  componentDidMount() {
-    this.setState({
-      isLoading: true
-    })
-    //const idbAdapter = new LokiIndexedAdapter()
     this.db = new Loki('metadata.db', {
       //adapter: idbAdapter,
+      env: 'BROWSER',
       autoload: true,
       autoloadCallback : this.dbInit.bind(this)
     })
+    this.container = document.createElement('div')
+    this.container.style.height = '100vh'
+    this.html`<div id="map" style="height: 100vh; width: 100%; padding-right: 0px;"></div>`
+  }
+
+  connectedCallback() {
+    this.css`${css}`
+    const el = this.shadowRoot.querySelector('#map')
+    this.map = L.map(el).setView([30.2672, -97.7431], 13)
+    const CartoDB_PositronNoLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    	subdomains: 'abcd',
+    	maxZoom: 19
+    }).addTo(this.map)
+
+    L.geoJson(tracts, {style: this.style.bind(this), onEachFeature: this.onEachFeature.bind(this)}).addTo(this.map)
+
+    var customControl = L.Control.extend({
+      options: {
+      position: 'topright'
+      //control position - allowed: 'topleft', 'topright', 'bottomleft', 'bottomright'
+      },
+      onAdd: function (map) {
+        var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom')
+
+        container.style.backdropFilter = 'invert(.7)'
+        container.style.width = '30vw'
+        container.style.height = '30px'
+        container.style.marginRight = '370px'
+
+        container.onclick = function(){
+          console.log('buttonClicked')
+        }
+        return container
+      },
+    })
+    this.map.addControl(new customControl())
+  }
+
+  disconnectedCallback() {
+
   }
 
   dbInit() {
     let meta = this.db.getCollection("metadata")
     if (meta === null) {
       meta = this.db.addCollection("metadata")
-      Papa.parse(csv, {
-        download: true,
-        header: true,
-        complete: data => {
-          meta.insert(data.data)
-          this.db.saveDatabase()
-          this.setState({
-            loadData: true,
-            isLoading: false,
-            coll: meta
-          })
-        }
-      })
+      // do things
     } else {
-      this.setState({
-        loadData: true,
-        isLoading: false,
-        coll: meta
-      })
+      // do different things
     }
+  }
+
+  getTier(htc) {
+    return htc > .35 ? 3
+          : htc > .28  ? 2
+          : htc > .20  ? 1
+          : 0;
+  }
+
+  getColor(htc) {
+    let color
+    switch (this.getTier(htc)) {
+      case 1:
+        color = '#ce8544'
+        break;
+      case 2:
+        color = '#c0c0c0'
+        break;
+      case 3:
+        color = '#d4af37'
+        break;
+      default:
+        color = 'transparent'
+    }
+    return color
   }
 
   onEachFeature(feature, layer) {
-    const coll = this.state.coll
-    let results = coll.find({'NAMELSAD': feature.properties.NAMELSAD})
-    const popupContent = `<Popup> Low Response Projection: ${results[0]['Low_Response_Score']||'N/A'} </Popup>`
-    layer.bindPopup(popupContent)
-  }
-
-  geoStyle(feature) {
-    const coll = this.state.coll
-    let results = coll.find({'NAMELSAD': feature.properties.NAMELSAD})
-    return {
-      color: '#1f2021',
-      weight: 1,
-      fillOpacity: results[0]['Low_Response_Score']*0.02,
-      fillColor: 'silver'
+    const color = this.getColor(feature.properties['ACSPercents.pct_Hispanic']*1.0)
+    const tier = this.getTier(feature.properties['ACSPercents.pct_Hispanic']*1.0)
+    const hoverStyle = {
+      fillColor: color === 'transparent'
+      ? '#43b3ae'
+      : color,
+      fillOpacity: 0.9
     }
+
+    const normalStyle = {
+      fillColor: color === 'transparent'
+      ? 'transparent'
+      : color,
+      fillOpacity: 0.6
+    }
+
+    function highlightFeature(ev) {
+      let obj = { tier: tier}
+      let payload = {...feature, ...obj}
+      Buffer.get('panel').set(payload)
+      layer.setStyle(hoverStyle)
+    }
+
+    function resetHighlight() {
+      //Buffer.get('panel').set(null)
+      layer.setStyle(normalStyle)
+    }
+
+    layer.on({
+    mouseover: highlightFeature,
+    mouseout: resetHighlight,
+    })
   }
 
-  render() {
-    const { isLoading, loadData } = this.state
-    const position = [this.state.lat, this.state.lng]
-    return (
-      <Map center={position} zoom={this.state.zoom}>
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url='https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
-        />
-        <TileLayer
-          url='https://stamen-tiles-{s}.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}{r}.png'
-          attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>'
-        />
-        {loadData && (
-          <Suspense fallback={<ReactLoading type="spinningBubble" color="green" />}>
-            <GeoJSON
-              data={tracts.features}
-              style={this.geoStyle.bind(this)}
-              onEachFeature={this.onEachFeature.bind(this)}
-            />
-          </Suspense>
-       )}
-       <Legend />
-      </Map>
-    )
+  style(feature) {
+    const color = this.getColor(feature.properties['ACSPercents.pct_Hispanic']*1.0)
+    return {
+        fillColor: color,
+        weight: 1,
+        opacity: 0.7,
+        color: color === 'transparent'
+        ? '#c0c0c080'
+        : color,
+        dashArray: '1',
+        fillOpacity: 0.6
+    };
   }
 }
-
-// Marker template for use with events, etc.
-// <Marker position={position}>
-//   <Popup>
-//
-//   </Popup>
-// </Marker>
+customElements.define("map-base", BaseMap)

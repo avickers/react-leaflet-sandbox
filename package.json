@@ -1,9 +1,10 @@
 {
-  "name": "react-leaflet-sandbox",
-  "version": "1.0.1",
-  "description": "Sandbox for React-Leaflet and Census data",
+  "name": "census-map",
+  "version": "2.0.0",
+  "description": "Sandbox for Census Map",
   "main": "src/index.js",
   "scripts": {
+    "prebuild": "rm -rf dist",
     "build": "parcel build src/index.html",
     "start": "parcel src/index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,19 +12,12 @@
   "author": "avickers",
   "license": "MIT",
   "dependencies": {
+    "@avickers/knockdown": "^0.2.1",
     "leaflet": "^1.6.0",
-    "lokijs": "^1.5.8",
-    "papaparse": "^5.1.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-leaflet": "^2.6.0",
-    "react-loading": "^2.0.3"
+    "lokijs": "^1.5.8"
   },
   "browserslist": [
-    "last 1 version",
-    "> 2%",
-    "maintained node versions",
-    "not dead"
+    "last 3 chrome versions"
   ],
   "devDependencies": {
     "cssnano": "^4.1.10"
