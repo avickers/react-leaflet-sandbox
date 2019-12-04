@@ -4,7 +4,7 @@ import Loki from 'lokijs'
 import LokiIndexedAdapter from 'lokijs/src/loki-indexed-adapter'
 import css from './css-leaflet'
 
-import tracts from '../assets/tracts.json'
+import tracts from '../../assets/tracts.json'
 
 export default class BaseMap extends Koc {
   constructor() {
@@ -69,9 +69,9 @@ export default class BaseMap extends Koc {
   }
 
   getTier(htc) {
-    return htc > .35 ? 3
-          : htc > .28  ? 2
-          : htc > .20  ? 1
+    return htc > .65 ? 3
+          : htc > .52  ? 2
+          : htc > .44  ? 1
           : 0;
   }
 
@@ -100,14 +100,14 @@ export default class BaseMap extends Koc {
       fillColor: color === 'transparent'
       ? '#43b3ae'
       : color,
-      fillOpacity: 0.9
+      fillOpacity: 0.33
     }
 
     const normalStyle = {
       fillColor: color === 'transparent'
       ? 'transparent'
       : color,
-      fillOpacity: 0.6
+      fillOpacity: 0.7
     }
 
     function highlightFeature(ev) {
@@ -133,12 +133,12 @@ export default class BaseMap extends Koc {
     return {
         fillColor: color,
         weight: 1,
-        opacity: 0.7,
+        opacity: 0.9,
         color: color === 'transparent'
         ? '#c0c0c080'
         : color,
         dashArray: '1',
-        fillOpacity: 0.6
+        fillOpacity: 0.7
     };
   }
 }
