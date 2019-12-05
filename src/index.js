@@ -43,6 +43,22 @@ class App extends Koc {
       z-index: 2000;
       pointer-events: none;
     }
+    @media (max-width: 760px) {
+      side-bar {
+        display: block;
+        position: absolute;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50vh;
+        width: 100%;
+        background-color: #0005;
+        z-index: 1001;
+        backdrop-filter: invert(.7);
+        pointer-events: none;
+      }
+    }
     `
     this.fluid()
   }
@@ -79,7 +95,7 @@ class App extends Koc {
 
     var num_cols = canvas_width / resolution; //This value is the number of columns in the grid.
     var num_rows = canvas_height / resolution; //This is number of rows.
-    var speck_count = 600; //This determines how many particles will be made.
+    var speck_count = num_cols * num_rows; //This determines how many particles will be made.
 
     var vec_cells = []; //The array that will contain the grid cells
     var particles = []; //The array that will contain the particles

@@ -163,6 +163,12 @@ export default class Tract extends Koc {
     .subheader {
       font-size: 24px;
     }
+    @media (max-width: 760px) {
+      .card h1 {
+        font-size: 36px;
+        margin-bottom: 5px;
+      }
+    }
     .content {
       display: grid;
       grid-template-columns: 1hr 1fr;
