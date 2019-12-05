@@ -1,16 +1,16 @@
 import {Koc} from '@avickers/knockdown'
 
 const meltedCopper = '#ce8544'
-const copperShadow = '0px 1px 0px #a96e3a, 0px 2px 0px #85572f, 0px 3px 0px #634225, 0px 4px 0px #432d1c, 0px 6px 7px #001135'
+const copperShadow = '0px 1px 0px #a96e3a, 0px 2px 0px #85572f, 0px 3px 0px #634225, 0px 5px 6px #001135'
 const copperShadowSmall = '0px 1px 0px #a96e3a, 0px 2px 0px #85572f, 0px 3px 0px #634225, 0px 3px 3px #001135'
 const metallicGold = '#d4af37'
-const goldShadow = '0px 1px 0px #ae8f30, 0px 2px 0px #897129, 0px 4px 0px #655421, 0px 6px 7px #001135'
+const goldShadow = '0px 1px 0px #ae8f30, 0px 2px 0px #897129, 0px 3px 0px #655421, 0px 5px 6px #001135'
 const goldShadowSmall = '0px 1px 0px #ae8f30, 0px 2px 0px #897129, 0px 3px 0px #655421, 0px 3px 3px #001135'
 const metallicSilver = '#c4cace'
-const silverShadow = '0px 1px 0px #a0a5a8, 0px 2px 0px #7e8284, 0px 4px 0px #5d6062, 0px 6px 7px #001135'
+const silverShadow = '0px 1px 0px #a0a5a8, 0px 2px 0px #7e8284, 0px 3px 0px #5d6062, 0px 5px 6px #001135'
 const silverShadowSmall = '0px 1px 0px #a0a5a8, 0px 2px 0px #7e8284, 0px 3px 0px #5d6062, 0px 3px 3px #001135'
 const verdigris = '#43b3ae'
-const verdiShadow = '0px 1px 0px #3b938f, 0px 2px 0px #327470, 0px 3px 0px #295654, 0px 4px 0px #1f3a38, 0px 6px 7px #001135'
+const verdiShadow = '0px 1px 0px #3b938f, 0px 2px 0px #327470, 0px 3px 0px #295654, 0px 5px 6px #001135'
 const verdiShadowSmall = '0px 1px 0px #3b938f, 0px 2px 0px #327470, 0px 3px 0px #295654, 0px 3px 3px #001135'
 
 export default class Tract extends Koc {
@@ -144,7 +144,7 @@ export default class Tract extends Koc {
     .engraved {
       text-align: center;
       font-size: 48px;
-      font-family: "Montserrat Alternates";
+      font-family: "Open Sans Condensed";
       color: ${ tier === 0
       ? verdigris
       : tier === 1
