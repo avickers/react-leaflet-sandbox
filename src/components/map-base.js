@@ -1,63 +1,10 @@
 import {Buffer,Koc} from '@avickers/knockdown'
-import * as L from 'leaflet'
+import mapboxgl from 'mapbox-gl'
 import Loki from 'lokijs'
 import LokiIndexedAdapter from 'lokijs/src/loki-indexed-adapter'
-import css from './css-leaflet'
+import css from './css-mapbox'
 
 import tracts from '../../assets/tracts.json'
-
-L.Map.mergeOptions({
-  touchExtend: true
-});
-
-L.Map.TouchExtend = L.Handler.extend({
-
-  initialize: function (map) {
-    this._map = map;
-    this._container = map._mapPane;
-    this._pane = map._panes.overlayPane;
-  },
-
-  addHooks: function () {
-    L.DomEvent.on(this._pane, 'touchstart', this._onTouchStart, this);
-    L.DomEvent.on(this._container, 'touchend', this._onTouchEnd, this);
-  },
-
-  removeHooks: function () {
-    L.DomEvent.off(this._pane, 'touchstart', this._onTouchStart);
-    L.DomEvent.off(this._container, 'touchend', this._onTouchEnd);
-  },
-
-  _onTouchStart: function (e) {
-    console.log(e)
-    if (!this._map._loaded) { return; }
-
-    var type = 'touchstart'
-    console.log(this._map)
-    let touch = e.touches[0]
-    let containerPoint = L.point(touch.clientX, touch.clientY)
-    var layerPoint = this._map.containerPointToLayerPoint(containerPoint)
-    var latlng = this._map.layerPointToLatLng(layerPoint)
-    console.log(latlng)
-    this._map.fire(type, {
-      latlng: latlng,
-      layerPoint: layerPoint,
-      containerPoint: containerPoint,
-      originalEvent: e
-    });
-  },
-
-  _onTouchEnd: function (e) {
-    if (!this._map._loaded) { return; }
-
-    var type = 'touchend';
-
-    this._map.fire(type, {
-      originalEvent: e
-    });
-  }
-});
-L.Map.addInitHook('addHandler', 'touchExtend', L.Map.TouchExtend)
 
 export default class BaseMap extends Koc {
   constructor() {
@@ -76,35 +23,87 @@ export default class BaseMap extends Koc {
   connectedCallback() {
     this.css`${css}`
     const el = this.shadowRoot.querySelector('#map')
-    this.map = L.map(el, { touchExtend: true }).setView([30.2672, -97.7431], 13)
-    const CartoDB_PositronNoLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-    	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    	subdomains: 'abcd',
-    	maxZoom: 19
-    }).addTo(this.map)
-
-    L.geoJson(tracts, {style: this.style.bind(this), onEachFeature: this.onEachFeature.bind(this)}).addTo(this.map)
-
-    var customControl = L.Control.extend({
-      options: {
-      position: 'topright'
-      //control position - allowed: 'topleft', 'topright', 'bottomleft', 'bottomright'
-      },
-      onAdd: function (map) {
-        var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom')
-
-        container.style.backdropFilter = 'invert(.7)'
-        container.style.width = '30vw'
-        container.style.height = '30px'
-        container.style.marginRight = '370px'
-
-        container.onclick = function(){
-          console.log('buttonClicked')
-        }
-        return container
-      },
+    mapboxgl.accessToken = process.env.MAPBOX
+    this.map = new mapboxgl.Map({
+      container: el,
+      style: `https://api.maptiler.com/maps/positron/style.json?key=${process.env.MAPTILER}`,
+      center: [-97.7431, 30.2672],
+      zoom: 9
     })
-    this.map.addControl(new customControl())
+
+    this.map.on('load', () => {
+      this.map.addSource('tracts', {
+        type: 'geojson',
+        data: tracts
+      })
+
+      this.map.addLayer({
+        'id': 'tracts-layer',
+        'type': 'fill',
+        'source': 'tracts',
+        'layout': {
+          'visibility': 'visible'
+        },
+        'paint': {
+          'fill-color': {
+            'property': 'ACSPercents.pct_Hispanic',
+            'stops': [
+                [.4437, 'transparent'],
+                [.5251, '#deebf7'],
+                [.6555, '#9ecae1'],
+                [1, '#3182bd']
+            ]
+          },
+          'fill-outline-color': '#c0c0c0',
+          'fill-opacity': 0.9
+        }
+      })
+
+      this.map.on('click', 'tracts-layer', (e) => {
+        console.log(e)
+        const tier = {tier:1}
+        const payload = {...e.features[0], ...tier}
+        Buffer.get('panel').set(payload)
+      })
+
+      this.map.on('mouseenter', 'tracts-layer', () => {
+        this.map.getCanvas().style.cursor = 'pointer';
+      })
+
+        // Change it back to a pointer when it leaves.
+      this.map.on('mouseleave', 'tracts-layer', () => {
+        this.map.getCanvas().style.cursor = '';
+      })
+    })
+    //this.map = L.map(el, { touchExtend: true }).setView([30.2672, -97.7431], 13)
+    // const CartoDB_PositronNoLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    // 	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    // 	subdomains: 'abcd',
+    // 	maxZoom: 19
+    // }).addTo(this.map)
+    //
+    // L.geoJson(tracts, {style: this.style.bind(this), onEachFeature: this.onEachFeature.bind(this)}).addTo(this.map)
+
+    // var customControl = L.Control.extend({
+    //   options: {
+    //   position: 'topright'
+    //   //control position - allowed: 'topleft', 'topright', 'bottomleft', 'bottomright'
+    //   },
+    //   onAdd: function (map) {
+    //     var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom')
+    //
+    //     container.style.backdropFilter = 'invert(.7)'
+    //     container.style.width = '30vw'
+    //     container.style.height = '30px'
+    //     container.style.marginRight = '370px'
+    //
+    //     container.onclick = function(){
+    //       console.log('buttonClicked')
+    //     }
+    //     return container
+    //   },
+    // })
+    // this.map.addControl(new customControl())
   }
 
   disconnectedCallback() {
